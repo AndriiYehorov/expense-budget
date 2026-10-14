@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Учёт расходов</title>
+  <meta name="theme-color" content="#E9EEEC" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0E1513" media="(prefers-color-scheme: dark)">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="top" id="top"></header>
+    <p class="notice" id="notice" hidden></p>
+    <main id="view" tabindex="-1"></main>
+    <nav class="tabs" id="tabs" aria-label="Разделы" hidden>
+      <button type="button" data-action="tab" data-tab="today">Сегодня</button>
+      <button type="button" data-action="tab" data-tab="days">Дни</button>
+      <button type="button" data-action="tab" data-tab="payments">Платежи</button>
+      <button type="button" data-action="tab" data-tab="settings">Настройки</button>
+    </nav>
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  </div>
+  <script src="bundle.js" defer></script>
+  <script src="js/pwa.js" defer></script>
+</body>
+</html>
