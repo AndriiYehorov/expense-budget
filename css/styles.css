@@ -91,7 +91,8 @@ button { cursor: pointer; }
 
 .top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; }
 .brand { font-family: var(--font-display); font-weight: 500; font-size: 13px; letter-spacing: 0.02em; }
-.period { color: var(--muted); font-size: 13px; }
+.period { font-size: 13px; text-align: right; }
+.quick { display: flex; flex-wrap: wrap; gap: 4px 16px; }
 
 .demo-banner {
   flex-basis: 100%;
