@@ -1,4 +1,4 @@
-import { summarize, dayRows, parseAmount, todayISO, addDays, diffDays, parseISO, nextPeriod, monthBounds, sumPayments, dueDate } from './budget.js';
+import { summarize, dayRows, parseAmount, todayISO, addDays, addMonths, diffDays, parseISO, nextPeriod, sumPayments, dueDate } from './budget.js';
 import { createStorage } from './storage.js';
 import { makeDemo } from './demo.js';
 
@@ -125,7 +125,7 @@ function renderTop() {
   const s = state.settings;
   el.top.innerHTML =
     '<h1 class="brand">Учёт расходов</h1>' +
-    (s ? `<p class="period">${shortLabel(s.periodStart)} — ${shortLabel(s.periodEnd)}</p>` : '') +
+    (s ? `<button type="button" class="link period" data-action="tab" data-tab="settings" aria-label="Изменить период">${shortLabel(s.periodStart)} — ${shortLabel(s.periodEnd)}, изменить</button>` : '') +
     (s?.demo
       ? '<div class="demo-banner"><span>Пример данных, не ваши траты</span><button type="button" class="link" data-action="reset-demo">Начать с нуля</button></div>'
       : '');
@@ -346,19 +346,20 @@ function settingsForm(values, mode) {
   ).join('');
   return (
     '<form class="card" id="settingsForm" novalidate>' +
-    `<h2>${first ? 'Начнём с суммы на период' : 'Период и суммы'}</h2>` +
-    (first
-      ? '<p class="hint">Укажите сколько денег вы получаете на период и сколько хотите отложить. Остальное приложение разделит на дни.</p>'
-      : '') +
+    `<h2>${first ? 'Начнём с периода и суммы' : 'Период и суммы'}</h2>` +
+    '<p class="hint">Период: с какого числа пришли деньги и до какого их нужно растянуть. Обычно это день до следующего пополнения.</p>' +
+    '<div class="grid2 grid2--stack">' +
+    `<label class="field"><span>С какого числа</span><input id="f-start" name="start" type="date" value="${values.periodStart}"></label>` +
+    `<label class="field"><span>По какое число (включительно)</span><input id="f-end" name="end" type="date" value="${values.periodEnd}"></label>` +
+    '</div>' +
+    '<div class="quick">' +
+    '<button type="button" class="link" data-action="period-today">С сегодня на месяц</button>' +
+    (first ? '' : '<button type="button" class="link" data-action="fill-next-period">Следующий период</button>') +
+    '</div>' +
     '<label class="field"><span>Сумма на период (база)</span><input id="f-base" name="base" inputmode="decimal" autocomplete="off" placeholder="30 000"' +
     ` value="${esc(inputValue(values.base))}"></label>` +
     '<label class="field"><span>Отложка (неприкосновенная сумма)</span><input id="f-reserve" name="reserve" inputmode="decimal" autocomplete="off" placeholder="0"' +
     ` value="${esc(inputValue(values.reserve))}"></label>` +
-    '<div class="grid2 grid2--stack">' +
-    `<label class="field"><span>Начало периода</span><input id="f-start" name="start" type="date" value="${values.periodStart}"></label>` +
-    `<label class="field"><span>Конец периода</span><input id="f-end" name="end" type="date" value="${values.periodEnd}"></label>` +
-    '</div>' +
-    (first ? '' : '<button type="button" class="link" data-action="fill-next-period" style="align-self:flex-start">Подставить следующий период</button>') +
     `<label class="field"><span>Валюта</span><select id="f-currency" name="currency">${options}</select></label>` +
     '<p class="preview" id="preview"></p>' +
     '<p class="form-error" id="settingsError" role="alert" hidden></p>' +
@@ -368,7 +369,8 @@ function settingsForm(values, mode) {
 }
 
 function viewSetup(today) {
-  const { start, end } = monthBounds(today);
+  const start = today;
+  const end = addDays(addMonths(today, 1), -1);
   return (
     settingsForm({ base: 0, reserve: 0, periodStart: start, periodEnd: end, currency: '₴' }, 'setup') +
     '<section class="card"><h2>Сначала посмотреть</h2>' +
@@ -704,6 +706,15 @@ async function importData() {
   toast(`Восстановлено трат: ${data.expenses.length}`);
 }
 
+function fillPeriodFromToday() {
+  const form = document.getElementById('settingsForm');
+  if (!form) return;
+  const today = todayISO();
+  form.elements.start.value = today;
+  form.elements.end.value = addDays(addMonths(today, 1), -1);
+  updatePreview();
+}
+
 function fillNextPeriod() {
   const form = document.getElementById('settingsForm');
   if (!form || !state.settings) return;
@@ -736,6 +747,7 @@ document.getElementById('app').addEventListener('click', (event) => {
   else if (action === 'demo') loadDemo();
   else if (action === 'reset-demo') wipeAll();
   else if (action === 'fill-next-period') fillNextPeriod();
+  else if (action === 'period-today') fillPeriodFromToday();
   else if (action === 'next-period-go') {
     goTab('settings');
     fillNextPeriod();
